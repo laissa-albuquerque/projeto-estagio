@@ -1,0 +1,37 @@
+# Arquivos de configuração locais (gerados pelo Django)
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+
+# Arquivos gerados pelo IDE/editor de código
+.idea/
+.vscode/
+
+# Arquivos de ambiente
+.env
+
+# Arquivos de build
+/build/
+/dist/
+
+# Arquivos de mídia gerados
+/media/
+
+# Banco de dados SQLite
+*.sqlite3
+
+# Arquivos de cache
+__pycache__/
+.cache/
+
+# Arquivos de artefatos de imagem ou vídeo
+/static/artes/
+
+# Arquivos de registro
+/logs/
+
+# Arquivos de dependências Python
+/.venv/
+/pip-selfcheck.json
