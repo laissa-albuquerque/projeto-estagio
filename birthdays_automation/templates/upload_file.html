@@ -26,9 +26,7 @@
                 });
 
                 const data = await response.json();
-                // Exibir a arte gerada
-                const arteUrl = data.arte_url;
-                document.getElementById('result').innerHTML += `<img src="${arteUrl}" alt="Arte dos aniversariantes">`;
+                document.getElementById('result').innerHTML += `<img src="${data.arte_url}" alt="Arte dos aniversariantes">`;
             } catch (error) {
                 console.error('Erro ao enviar o arquivo:', error);
             }
