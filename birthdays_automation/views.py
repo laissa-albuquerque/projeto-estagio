@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from django.conf import settings
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -7,6 +8,10 @@ from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 import uuid
 from more_itertools import chunked
+from django.shortcuts import redirect
+
+def redirect_to_upload(request):
+    return redirect('/birthdays_automation/upload/')
 
 def upload_file_view(request):
     if request.method == 'POST' and request.FILES['file']:
@@ -28,36 +33,33 @@ def upload_file_view(request):
             "12": "Dezembro"
         }
 
-        # Converter o DataFrame em uma lista de dicionários
         aniversariantes = df.to_dict(orient='records')
-
         current_month = meses[str(aniversariantes[0]['MES'])]
         year = datetime.now().year 
 
-        # Path do template e da fonte
-        font_path = os.path.join(settings.STATIC_ROOT, 'arial_black.ttf')
-        template_path = os.path.join(settings.STATIC_ROOT, 'template.png')
+        font_path = os.path.join(settings.STATICFILES_DIRS[0], 'arial_black.ttf')
+        template_path = os.path.join(settings.STATICFILES_DIRS[0], 'template.png')
 
-        # Fonte cabeçalho e corpo
-        font = ImageFont.truetype('arialbd.ttf', size=42)
-        fontLineTwo = ImageFont.truetype('arialbd.ttf', size=30)
+        if not os.path.exists(font_path):
+            return JsonResponse({'error': 'Fonte não encontrada'}, status=500)
+
+        font = ImageFont.truetype(font_path, size=38)
+        fontLineTwo = ImageFont.truetype(font_path, size=25)
         fontTitleMonth = ImageFont.truetype(font_path, size=58)
 
         new_list = list(chunked(aniversariantes, 7))
     
         order = 1
+        image_urls = []
         for value in new_list:
-            # Tamplate a ser desenhado
             template = Image.open(template_path)
             draw = ImageDraw.Draw(template)  
             
-            # Titulo
-            title = current_month.upper() + ' ' + (str(year)) 
+            title = current_month.upper() + ' ' + str(year)
             title_bbox = draw.textbbox((0, 0), title, font=fontTitleMonth)
             title_width = title_bbox[2] - title_bbox[0]
             title_x = (template.width - title_width) / 2 
 
-            # Desenhar o título no centro da imagem
             draw.text((title_x, 470), title, fill='white', font=fontTitleMonth) 
 
             y = 700
@@ -66,10 +68,10 @@ def upload_file_view(request):
                 day = aniversariante['DIA']
                 month = aniversariante['MES']
 
-                if(month <= 9):
+                if month <= 9:
                     month = '0' + str(month)
 
-                line_one = str(day) + '/' + str(month) + ' ' + name.upper()
+                line_one = f"{day}/{month} {name.upper()}"
                 line_one_bbox = draw.textbbox((0, 0), line_one, font=font)
                 line_one_width = line_one_bbox[2] - line_one_bbox[0]
                 line_one_x = (template.width - line_one_width) / 2 
@@ -83,16 +85,19 @@ def upload_file_view(request):
                 description_x = (template.width - description_width) / 2 
 
                 draw.text((description_x, y), description, fill='#1f3864', font=fontLineTwo)
-                y+= 100
+                y += 100
 
-            # Salvando a imagem gerada
-            generated_image_path = os.path.join(settings.MEDIA_ROOT, 'birthdays_automation', 'static', 'imagens_geradas', f'aniversariantes-{current_month}-{order}-{uuid.uuid4()}.png')
-            
-            template.save(generated_image_path)
+            generated_dir = Path(settings.MEDIA_ROOT) / 'imagens_geradas'
+            generated_dir.mkdir(parents=True, exist_ok=True)
 
-            order+=1        
+            generated_image_path = generated_dir / f'aniversariantes-{current_month.lower()}-{order}-{uuid.uuid4()}.png'
+            template.save(str(generated_image_path))
 
-        # Retorne os nomes dos aniversariantes e a URL para a arte gerada
-        return JsonResponse({'aniversariantes': aniversariantes, 'arte_url': generated_image_path})
+            image_url = os.path.join(settings.MEDIA_URL, 'imagens_geradas', os.path.basename(generated_image_path))
+            image_urls.append(image_url)
+
+            order += 1        
+
+        return JsonResponse({'aniversariantes': aniversariantes, 'image_urls': image_urls})
 
     return render(request, 'upload_file.html')

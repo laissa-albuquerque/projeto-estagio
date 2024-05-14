@@ -1,18 +1,112 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload File</title>
+    <title>Aniversariantes - Unifacisa</title>
+    <link rel="icon" href="{% static 'unifacisa-logo.png' %}">
 </head>
 <body>
-    <form id="uploadForm" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="file">
-        <button type="submit">Enviar</button>
-    </form>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(90deg, #104475, #144f88, #185a9b, #1e65ae, #2470c2, #2b7cd6, #3387ea, #3c93ff);
+        }
 
-    <div id="result"></div>
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        img {
+            margin-bottom: 16px;
+        }
+
+        form {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .custom-file-input {
+            display: inline-block;
+            width: 260px; 
+            height: 40px; 
+            background: linear-gradient(180deg, #5a57ff, #4f62ff, #456cff, #3d75ff, #377dff, #3485ff, #368cff, #3c93ff);            
+            color: #fff; 
+            text-align: center;
+            line-height: 40px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-right: 10px;
+        }
+
+        .custom-file-input input[type="file"] {
+            display: none; 
+        }
+
+        .custom-file-input:hover {
+            background: linear-gradient(90deg, #3c93ff, #368bff, #3582ff, #3979ff, #426fff, #4d64ff, #5a57ff);
+        }
+
+        button {
+            background-color: #3abd4e;
+            width: 60px;
+            height: 40px; 
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #267a33;
+        }
+
+        #result {
+            display: flex;
+        }
+
+        #result a {
+            padding: 8px;
+            background-color: #144274;
+            border-radius: 8px;
+            margin-right: 4px;
+            color: #dddddd;         
+        }
+
+        #result a:hover {
+            color: #ffffff;
+        }
+    </style>
+
+    <img src= "{% static 'unifacisa-logo.png' %}" alt="logo">
+    <div class="container">
+        <h4>Envie aqui um arquivo com extensão .xlsx</h4>
+        <form id="uploadForm" method="post" enctype="multipart/form-data" class="form">
+            {% csrf_token %}
+            <label class="custom-file-input">
+                <span id="fileInputLabel">clique para selecionar</span>
+                <input type="file" name="file" id="fileInput">
+            </label>
+            <button type="submit">✔</button>
+        </form>
+    
+        <div id="result"></div>
+    </div>
 
     <script>
         document.getElementById('uploadForm').addEventListener('submit', async function(event) {
@@ -25,11 +119,42 @@
                     body: formData,
                 });
 
+                if (!response.ok) {
+                    throw new Error('Erro ao enviar o arquivo');
+                }
+
                 const data = await response.json();
-                document.getElementById('result').innerHTML += `<img src="${data.arte_url}" alt="Arte dos aniversariantes">`;
+
+                document.getElementById('result').innerHTML = '';
+
+                let count = 1;
+                data.image_urls.forEach(imageUrl => {
+                    const link = document.createElement('a');
+                    link.href = imageUrl;
+                    link.download = imageUrl.split('/').pop(); 
+                    link.innerText = 'imagem ' + count.toString();
+                    document.getElementById('result').appendChild(link);
+                    document.getElementById('result').appendChild(document.createElement('br'));
+                    count += 1;
+                });
             } catch (error) {
                 console.error('Erro ao enviar o arquivo:', error);
             }
+        });
+
+        function updateFileInputLabel(text) {
+            document.getElementById('fileInputLabel').innerText = text;
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function() {
+            const fileName = this.files[0] ? this.files[0].name : 'clique para selecionar';
+            updateFileInputLabel(fileName);
+        });
+
+        document.getElementById('fileInput').addEventListener('click', function() {
+            this.value = null; // Limpa o valor do input de arquivo
+            updateFileInputLabel('clique para selecionar');
+            document.getElementById('result').innerHTML = '';
         });
     </script>
 </body>
