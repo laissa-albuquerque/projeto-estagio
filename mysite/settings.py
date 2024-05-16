@@ -49,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'birthdays_automation.middleware.ClearMediaMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'
