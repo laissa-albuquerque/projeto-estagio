@@ -1,6 +1,3 @@
-Perfeito! Com base nas informações fornecidas, aqui está um exemplo de README para o seu projeto:
-
----
 
 # Sistema de Criação de Artes para Aniversariantes
 
