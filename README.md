@@ -1,7 +1,7 @@
 
-# Sistema de Criação de Artes para Aniversariantes
+# Sistema de Template para Aniversariantes
 
-Este projeto tem como objetivo automatizar a criação de artes semanais para os aniversariantes da semana, facilitando o processo no setor de RH.
+Este projeto tem como objetivo automatizar em um template as inserções semanais para os aniversariantes da semana, facilitando o processo no setor de RH.
 
 ## Índice
 
